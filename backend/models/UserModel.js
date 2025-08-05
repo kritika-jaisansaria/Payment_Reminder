@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   name: String,
   email: { type: String, required: true, unique: true },
-
+timezone: { type: String, default: 'UTC' },
+  reminderTime: { type: String, default: '09:00' },
   // OTP details for verification
   otp: {
     code: String,

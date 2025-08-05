@@ -16,7 +16,17 @@ const Login = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const navigate = useNavigate();
-  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://payment-dashboard-nc3q.onrender.com';
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
+
+  // Handle resize for mobile
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -25,6 +35,7 @@ const Login = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Timer for resend OTP
   useEffect(() => {
     let interval = null;
     if (resendTimer > 0) {
@@ -71,13 +82,22 @@ const Login = () => {
     try {
       setLoading(true);
       const res = await axios.post(`${BASE_URL}/api/auth/login`, { email, otp });
-      const token = res.data.token;
-      localStorage.setItem('token', token);
+
+      localStorage.setItem('token', res.data.token);
+      if (res.data.user) {
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+      }
+
       toast.success('Logged in successfully');
       setTimeout(() => navigate('/dashboard'), 1500);
     } catch (err) {
       const msg = err.response?.data?.message || 'Invalid OTP';
-      toast.error(msg);
+      // Custom message for user not found
+      if (msg.includes('User not found')) {
+        toast.error('User not found. Please register first.');
+      } else {
+        toast.error(msg);
+      }
       if (msg.toLowerCase().includes('expired')) {
         setOtpSent(true);
       }
@@ -95,7 +115,6 @@ const Login = () => {
         backgroundColor: '#f8f1e7',
       }}
     >
-      {/* Left Side Image */}
       {!isMobile && (
         <div style={{ flex: 1 }}>
           <img
@@ -106,7 +125,6 @@ const Login = () => {
         </div>
       )}
 
-      {/* Right Side Form */}
       <div
         style={{
           flex: 1,
@@ -212,7 +230,18 @@ const Login = () => {
         </div>
       </div>
 
-      <ToastContainer position="top-center" />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </div>
   );
 };

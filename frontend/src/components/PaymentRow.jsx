@@ -5,8 +5,7 @@ import { toast } from 'react-toastify';
 const PaymentRow = ({ payment, fetchPayments, openModal, isMobile }) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const token = localStorage.getItem('token');
-
-  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://payment-dashboard-nc3q.onrender.com';
 
   const handleDelete = async () => {
     try {
@@ -23,16 +22,35 @@ const PaymentRow = ({ payment, fetchPayments, openModal, isMobile }) => {
     }
   };
 
+  // Base styles
   const trStyle = {
-    backgroundColor: '#fdfdfd',
+    backgroundColor: '#fff',
     borderRadius: '12px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-    marginBottom: '14px',
+    boxShadow: 'none',
+    marginBottom: '16px',
     color: '#333',
     fontSize: '0.95rem',
     userSelect: 'none',
     cursor: 'default',
     display: isMobile ? 'block' : 'table-row',
+    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+     border: 'none',             // 🔑 Remove default row borders
+  outline: 'none', 
+  overflow: 'hidden',
+
+  };
+
+  const handleMouseEnter = (e) => {
+    if (!isMobile) {
+      e.currentTarget.style.transform = 'scale(1.02)';
+      e.currentTarget.style.cursor = 'pointer';
+    }
+  };
+  const handleMouseLeave = (e) => {
+    if (!isMobile) {
+      e.currentTarget.style.transform = 'scale(1)';
+      e.currentTarget.style.cursor = 'default';
+    }
   };
 
   const tdStyleBase = {
@@ -51,13 +69,12 @@ const PaymentRow = ({ payment, fetchPayments, openModal, isMobile }) => {
   };
 
   const labelStyle = {
-    fontWeight: '600',
-    fontSize: '0.8rem',
+    fontWeight: '700',
+    fontSize: '0.75rem',
     color: '#4CAF50',
-    marginBottom: '4px',
-    display: 'block',
+    marginBottom: '6px',
     textTransform: 'uppercase',
-    letterSpacing: '0.05em',
+    letterSpacing: '0.07em',
   };
 
   const valueStyle = {
@@ -66,49 +83,58 @@ const PaymentRow = ({ payment, fetchPayments, openModal, isMobile }) => {
     fontSize: '0.95rem',
   };
 
-  const statusStyle = {
-    padding: '6px 12px',
-    borderRadius: '14px',
-    backgroundColor:
-      payment.status === 'paid'
-        ? '#e0f7ec'
-        : payment.status === 'pending'
-        ? '#fff8e1'
-        : payment.status === 'overdue'
-        ? '#fdecea'
-        : '#f0f0f0',
-    color:
-      payment.status === 'paid'
-        ? '#1a7f5a'
-        : payment.status === 'pending'
-        ? '#b08500'
-        : payment.status === 'overdue'
-        ? '#b00020'
-        : '#666',
-    fontWeight: '600',
-    textTransform: 'capitalize',
-    fontSize: '0.85rem',
-    display: 'inline-block',
-    minWidth: '80px',
+  const statusColors = {
+    paid: { bg: '#e0f7ec', color: '#1a7f5a' },
+    pending: { bg: '#fff8e1', color: '#b08500' },
+    overdue: { bg: '#fdecea', color: '#b00020' },
+    cancelled: { bg: '#f0f0f0', color: '#666' },
   };
 
-  const buttonStyleBase = {
-    padding: isMobile ? '8px 12px' : '10px 18px',
-    borderRadius: '8px',
+  const statusStyle = {
+    padding: '7px 14px',
+    borderRadius: '18px',
+    backgroundColor: statusColors[payment.status]?.bg || '#f0f0f0',
+    color: statusColors[payment.status]?.color || '#666',
+    fontWeight: '700',
+    textTransform: 'capitalize',
+    fontSize: '0.88rem',
+    display: 'inline-block',
+    minWidth: '80px',
+    textAlign: 'center',
+    boxShadow: `0 1px 4px ${statusColors[payment.status]?.color}33`,
+    userSelect: 'none',
+  };
+
+  const buttonBase = {
+    padding: isMobile ? '8px 14px' : '10px 20px',
+    borderRadius: '10px',
     border: 'none',
     cursor: 'pointer',
     fontWeight: '600',
     fontSize: isMobile ? '0.85rem' : '0.92rem',
     color: '#fff',
     flex: 1,
-    minWidth: '80px',
-    transition: 'background-color 0.3s ease',
+    minWidth: '90px',
+    transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+    userSelect: 'none',
+  };
+
+  // Updated hover handler to reset to original color on mouse leave
+  const handleBtnHover = (e, isEnter, hoverColor, shadow, originalColor) => {
+    if (isEnter) {
+      e.currentTarget.style.backgroundColor = hoverColor;
+      e.currentTarget.style.boxShadow = shadow;
+    } else {
+      e.currentTarget.style.backgroundColor = originalColor;
+      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)';
+    }
   };
 
   const modalOverlayStyle = {
     position: 'fixed',
     top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -117,122 +143,129 @@ const PaymentRow = ({ payment, fetchPayments, openModal, isMobile }) => {
 
   const modalStyle = {
     backgroundColor: '#fff',
-    padding: isMobile ? '20px' : '30px',
-    borderRadius: '12px',
-    width: isMobile ? '90%' : '320px',
+    padding: isMobile ? '22px 24px' : '32px 40px',
+    borderRadius: '14px',
+    width: isMobile ? '90%' : '350px',
     maxWidth: '95%',
-    boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+    boxShadow: '0 10px 28px rgba(0,0,0,0.18)',
     textAlign: 'center',
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    userSelect: 'none',
+  };
+
+  const modalTextStyle = {
+    marginBottom: '24px',
+    fontSize: '1.1rem',
+    color: '#222',
+    fontWeight: '700',
+  };
+
+  const modalBtnContainer = {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '18px',
+    flexWrap: 'wrap',
   };
 
   return (
-    <>
-      <tr style={trStyle}>
-        {isMobile ? (
-          <>
-            <td style={tdMobileStyle}>
-              <span style={labelStyle}>Name</span>
-              <span style={valueStyle}>{payment.paymentName}</span>
-            </td>
-            <td style={tdMobileStyle}>
-              <span style={labelStyle}>Amount</span>
-              <span style={valueStyle}>₹{payment.amount.toLocaleString()}</span>
-            </td>
-            <td style={tdMobileStyle}>
-              <span style={labelStyle}>Category</span>
-              <span style={valueStyle}>{payment.category}</span>
-            </td>
-            <td style={tdMobileStyle}>
-              <span style={labelStyle}>Deadline</span>
-              <span style={valueStyle}>{new Date(payment.deadline).toLocaleDateString()}</span>
-            </td>
-            <td style={tdMobileStyle}>
-              <span style={labelStyle}>Status</span>
-              <span style={statusStyle}>{payment.status}</span>
-            </td>
-            <td style={{ ...tdMobileStyle, flexDirection: 'row', justifyContent: 'center', gap: '10px' }}>
-              <button
-                onClick={() => openModal(payment)}
-                style={{
-                  ...buttonStyleBase,
-                  backgroundColor: '#2196F3',
-                  boxShadow: '0 4px 12px rgba(33,150,243,0.25)',
-                }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1976d2'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#2196F3'}
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => setConfirmDelete(true)}
-                style={{
-                  ...buttonStyleBase,
-                  backgroundColor: '#f44336',
-                  boxShadow: '0 4px 12px rgba(244,67,54,0.25)',
-                }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#d32f2f'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#f44336'}
-              >
-                Delete
-              </button>
-            </td>
-          </>
-        ) : (
-          <>
-            <td style={tdStyleBase}>{payment.paymentName}</td>
-            <td style={tdStyleBase}>₹{payment.amount.toLocaleString()}</td>
-            <td style={tdStyleBase}>{payment.category}</td>
-            <td style={tdStyleBase}>{new Date(payment.deadline).toLocaleDateString()}</td>
-            <td style={tdStyleBase}>
-              <span style={statusStyle}>{payment.status}</span>
-            </td>
-            <td style={{ ...tdStyleBase, display: 'flex', justifyContent: 'center', gap: '12px' }}>
-              <button
-                onClick={() => openModal(payment)}
-                style={{
-                  ...buttonStyleBase,
-                  backgroundColor: '#2196F3',
-                  boxShadow: '0 4px 12px rgba(33,150,243,0.25)',
-                }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1976d2'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#2196F3'}
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => setConfirmDelete(true)}
-                style={{
-                  ...buttonStyleBase,
-                  backgroundColor: '#f44336',
-                  boxShadow: '0 4px 12px rgba(244,67,54,0.25)',
-                }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#d32f2f'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#f44336'}
-              >
-                Delete
-              </button>
-            </td>
-          </>
-        )}
-      </tr>
+    <tr
+      style={trStyle}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {isMobile ? (
+        <>
+          <td style={tdMobileStyle}>
+            <span style={labelStyle}>Name</span>
+            <span style={valueStyle}>{payment.paymentName}</span>
+          </td>
+          <td style={tdMobileStyle}>
+            <span style={labelStyle}>Amount</span>
+            <span style={valueStyle}>₹{payment.amount.toLocaleString()}</span>
+          </td>
+          <td style={tdMobileStyle}>
+            <span style={labelStyle}>Category</span>
+            <span style={valueStyle}>{payment.category}</span>
+          </td>
+          <td style={tdMobileStyle}>
+            <span style={labelStyle}>Deadline</span>
+            <span style={valueStyle}>{new Date(payment.deadline).toLocaleDateString()}</span>
+          </td>
+          <td style={tdMobileStyle}>
+            <span style={labelStyle}>Status</span>
+            <span style={statusStyle}>{payment.status}</span>
+          </td>
+          <td style={{ ...tdMobileStyle, flexDirection: 'row', justifyContent: 'center', gap: '12px' }}>
+            <button
+              onClick={() => openModal(payment)}
+              style={{ ...buttonBase, backgroundColor: '#1976d2' }}
+              onMouseEnter={e => handleBtnHover(e, true, '#1565c0', '0 6px 20px rgba(21,101,192,0.4)', '#1976d2')}
+              onMouseLeave={e => handleBtnHover(e, false, '', '', '#1976d2')}
+              aria-label="Edit Payment"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => setConfirmDelete(true)}
+              style={{ ...buttonBase, backgroundColor: '#d32f2f' }}
+              onMouseEnter={e => handleBtnHover(e, true, '#b71c1c', '0 6px 20px rgba(183,28,28,0.4)', '#d32f2f')}
+              onMouseLeave={e => handleBtnHover(e, false, '', '', '#d32f2f')}
+              aria-label="Delete Payment"
+            >
+              Delete
+            </button>
+          </td>
+        </>
+      ) : (
+        <>
+          <td style={tdStyleBase}>{payment.paymentName}</td>
+          <td style={tdStyleBase}>₹{payment.amount.toLocaleString()}</td>
+          <td style={tdStyleBase}>{payment.category}</td>
+          <td style={tdStyleBase}>{new Date(payment.deadline).toLocaleDateString()}</td>
+          <td style={tdStyleBase}>
+            <span style={statusStyle}>{payment.status}</span>
+          </td>
+          <td style={{ ...tdStyleBase, display: 'flex', justifyContent: 'center', gap: '18px' }}>
+            <button
+              onClick={() => openModal(payment)}
+              style={{ ...buttonBase, backgroundColor: '#1976d2' }}
+              onMouseEnter={e => handleBtnHover(e, true, '#1565c0', '0 6px 20px rgba(21,101,192,0.4)', '#1976d2')}
+              onMouseLeave={e => handleBtnHover(e, false, '', '', '#1976d2')}
+              aria-label="Edit Payment"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => setConfirmDelete(true)}
+              style={{ ...buttonBase, backgroundColor: '#d32f2f' }}
+              onMouseEnter={e => handleBtnHover(e, true, '#b71c1c', '0 6px 20px rgba(183,28,28,0.4)', '#d32f2f')}
+              onMouseLeave={e => handleBtnHover(e, false, '', '', '#d32f2f')}
+              aria-label="Delete Payment"
+            >
+              Delete
+            </button>
+          </td>
+        </>
+      )}
 
       {confirmDelete && (
-        <div style={modalOverlayStyle} onClick={() => setConfirmDelete(false)}>
+        <div style={modalOverlayStyle} onClick={() => setConfirmDelete(false)} role="dialog" aria-modal="true">
           <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-            <p style={{ marginBottom: '20px', fontSize: '1.05rem', color: '#333', fontWeight: '600' }}>
+            <p style={modalTextStyle}>
               Are you sure you want to delete this payment?
             </p>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={modalBtnContainer}>
               <button
                 onClick={handleDelete}
-                style={{ ...buttonStyleBase, backgroundColor: '#f44336', minWidth: '100px' }}
+                style={{ ...buttonBase, backgroundColor: '#d32f2f', minWidth: '110px' }}
+                aria-label="Confirm Delete"
               >
                 Yes, Delete
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
-                style={{ ...buttonStyleBase, backgroundColor: '#888', minWidth: '100px' }}
+                style={{ ...buttonBase, backgroundColor: '#777', minWidth: '110px' }}
+                aria-label="Cancel Delete"
               >
                 Cancel
               </button>
@@ -240,7 +273,7 @@ const PaymentRow = ({ payment, fetchPayments, openModal, isMobile }) => {
           </div>
         </div>
       )}
-    </>
+    </tr>
   );
 };
 

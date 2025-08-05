@@ -15,16 +15,17 @@ const otpMessageHTML = (otp) => `
   </div>
 `;
 
+// Send OTP - used for both register & login request
 exports.sendOtp = async (req, res) => {
   const { email, name } = req.body;
-  if (!email) return res.status(400).json({ message: 'Email required' });
+  if (!email) return res.status(400).json({ message: 'Email is required' });
 
   let user = await User.findOne({ email });
 
-  // If user doesn't exist, require name for registration
+  // If user does not exist, require name to register new user
   if (!user) {
     if (!name) {
-      return res.status(400).json({ message: 'Name required for new users' });
+      return res.status(400).json({ message: 'User not found.Please register first.' });
     }
     user = new User({ email, name });
   }
@@ -47,6 +48,7 @@ exports.sendOtp = async (req, res) => {
   }
 };
 
+// Resend OTP endpoint with cooldown & max resend checks
 exports.resendOtp = async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: 'Email is required' });
@@ -58,7 +60,7 @@ exports.resendOtp = async (req, res) => {
   const RESEND_COOLDOWN = 60 * 1000; // 60 seconds cooldown
   const MAX_RESEND = 5;
 
-  if (user.otpResendLastTime && (now - user.otpResendLastTime) < RESEND_COOLDOWN) {
+  if (user.otpResendLastTime && now - user.otpResendLastTime < RESEND_COOLDOWN) {
     return res.status(429).json({ message: 'Please wait before resending OTP again' });
   }
 
@@ -84,13 +86,14 @@ exports.resendOtp = async (req, res) => {
   }
 };
 
+// Register endpoint — user verifies OTP to complete registration
 exports.register = async (req, res) => {
   const { name, email, otp } = req.body;
   if (!email || !otp) {
-    return res.status(400).json({ message: 'Email and OTP required' });
+    return res.status(400).json({ message: 'Email and OTP are required' });
   }
 
-  let user = await User.findOne({ email });
+  const user = await User.findOne({ email });
   if (!user) {
     return res.status(400).json({ message: 'User not found. Please request OTP first.' });
   }
@@ -107,29 +110,32 @@ exports.register = async (req, res) => {
     user.name = name;
   }
 
-  // Clear OTP and resend counters after successful registration
+  // Clear OTP info and reset resend counters on successful registration
   user.otp = undefined;
   user.otpResendCount = 0;
   user.otpResendLastTime = undefined;
 
   await user.save();
 
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: '7d',
-  });
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-  res.status(201).json({ message: 'Registered successfully', token, user: { email: user.email, name: user.name } });
+  res.status(201).json({
+    message: 'Registered successfully',
+    token,
+    user: { email: user.email, name: user.name },
+  });
 };
 
+// Login endpoint — verify OTP to login
 exports.login = async (req, res) => {
   const { email, otp } = req.body;
   if (!email || !otp) {
-    return res.status(400).json({ message: 'Email and OTP required' });
+    return res.status(400).json({ message: 'Email and OTP are required' });
   }
 
   const user = await User.findOne({ email });
   if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+    return res.status(404).json({ message: 'User not found. Please register first.' });
   }
 
   if (!user.otp || user.otp.code !== otp) {
@@ -140,16 +146,48 @@ exports.login = async (req, res) => {
     return res.status(400).json({ message: 'OTP expired' });
   }
 
-  // Clear OTP and resend counters after successful login
+  // Clear OTP info and reset resend counters on successful login
   user.otp = undefined;
   user.otpResendCount = 0;
   user.otpResendLastTime = undefined;
 
   await user.save();
 
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: '7d',
-  });
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-  res.status(200).json({ message: 'Login successful', token, user: { email: user.email, name: user.name } });
+  res.status(200).json({
+    message: 'Login successful',
+    token,
+    user: { email: user.email, name: user.name },
+  });
+};
+
+// Get user profile handler
+exports.getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-passwordHash -otp -otpResendCount -otpResendLastTime');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Update user profile handler
+exports.updateProfile = async (req, res) => {
+  const { name, email, timezone, reminderTime } = req.body;
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (timezone) user.timezone = timezone;
+    if (reminderTime) user.reminderTime = reminderTime;
+
+    await user.save();
+    res.json({ message: 'Profile updated successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
 };

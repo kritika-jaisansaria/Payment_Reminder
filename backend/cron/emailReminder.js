@@ -53,8 +53,8 @@ const sendPaymentReminders = async () => {
 
 // ✅ Exported start function for use in server.js
 const start = () => {
-  cron.schedule('0 9 * * *', () => {
-    console.log('🕘 Running daily payment reminder job at 9 AM');
+  cron.schedule('41 17 * * *', () => {
+      console.log('Running reminder cron at', new Date());
     sendPaymentReminders();
   }, {
     scheduled: true,

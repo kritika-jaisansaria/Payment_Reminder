@@ -27,8 +27,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
 
-  // Use env variable for backend URL
-  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://payment-dashboard-nc3q.onrender.com';
 
   useEffect(() => {
     let interval = null;
@@ -104,7 +103,6 @@ const Register = () => {
         backgroundColor: '#f8f1e7',
       }}
     >
-      {/* Left Banner (hide on mobile) */}
       {!isMobile && (
         <div style={{ flex: 1 }}>
           <img
@@ -115,7 +113,6 @@ const Register = () => {
         </div>
       )}
 
-      {/* Right Form */}
       <div
         style={{
           flex: 1,
@@ -141,7 +138,6 @@ const Register = () => {
           </h2>
           <p style={{ fontSize: '14px', color: '#666' }}>Register using your email</p>
 
-          {/* Name */}
           <input
             type="text"
             name="name"
@@ -158,7 +154,6 @@ const Register = () => {
             }}
           />
 
-          {/* Email */}
           <input
             type="email"
             name="email"
@@ -175,7 +170,6 @@ const Register = () => {
             }}
           />
 
-          {/* OTP Input */}
           {otpSent && (
             <>
               <input
@@ -211,7 +205,6 @@ const Register = () => {
             </>
           )}
 
-          {/* Button */}
           <button
             onClick={!otpSent ? handleSendOtp : handleRegister}
             disabled={loading}
@@ -242,7 +235,17 @@ const Register = () => {
         </div>
       </div>
 
-      <ToastContainer position="top-center" />
+      {/* ✅ Styled Toast like Login */}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
     </div>
   );
 };
