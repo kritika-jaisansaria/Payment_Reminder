@@ -27,7 +27,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
 
-  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://payment-dashboard-nc3q.onrender.com';
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
 
   useEffect(() => {
     let interval = null;

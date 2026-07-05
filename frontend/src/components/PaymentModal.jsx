@@ -20,7 +20,7 @@ const PaymentModal = ({ onClose, fetchPayments, editingPayment }) => {
   const token = localStorage.getItem('token');
 
   // Base URL from env
-  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://payment-dashboard-nc3q.onrender.com';
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
 
   useEffect(() => {
     if (editingPayment) {

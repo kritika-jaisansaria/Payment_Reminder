@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 const PaymentRow = ({ payment, fetchPayments, openModal, isMobile }) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const token = localStorage.getItem('token');
-  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://payment-dashboard-nc3q.onrender.com';
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
 
   const handleDelete = async () => {
     try {

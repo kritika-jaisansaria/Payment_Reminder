@@ -12,7 +12,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 router.use(authMiddleware);
 
 router.post('/', createPayment);
-router.get('/', getPayments);
+router.get('/:id', getPayments);
 router.put('/:id', updatePayment);
 router.patch('/:id/status', updateStatus);
 router.delete('/:id', deletePayment);

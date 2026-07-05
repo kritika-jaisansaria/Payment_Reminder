@@ -24,7 +24,7 @@ const Dashboard = () => {
 
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
-  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://payment-dashboard-nc3q.onrender.com';
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
 
   // Redirect to login if not logged in
   useEffect(() => {

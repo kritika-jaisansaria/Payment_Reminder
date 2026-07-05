@@ -11,26 +11,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const app = express();   // Initialize express app first!
 
 // Middleware
-
-const allowedOrigins = [
-  'http://localhost:5173', // Local dev
-  'https://payment-dashboard-psi.vercel.app' // Deployed frontend
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
+app.use(cors());
 app.use(express.json());
 
 // Routes

@@ -16,7 +16,7 @@ const Login = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const navigate = useNavigate();
-  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://payment-dashboard-nc3q.onrender.com';
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
 
   // Redirect if already logged in
   useEffect(() => {
